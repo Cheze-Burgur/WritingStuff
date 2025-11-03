@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Cheze Stories</title>
+    <meta name="description" content="">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        /* Root */
+        :root {
+            --header: #eeeeee;
+            --accent: #ff9900;
+            --muted: #ffcc66;
+            --text: #111111;
+        }
+
+        /* Global Styles */
+        html,
+        body {
+            background: linear-gradient(180deg, #333333, #666666, #333333);
+            background-size: 600% 600%;
+            background-repeat: no-repeat;
+            font-family: Arial, Helvetica, sans-serif;
+            color: var(--header);
+            animation: gradientShift 15s ease infinite;
+            margin: 25px;
+        }
+
+        /* Layout Containers */
+        #head {
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        header,
+        nav {
+            border-radius: 25px;
+            align-self: center;
+            margin: 0 auto;
+            box-shadow: 0px 0px 5px 10px #555555;
+            opacity: 0;
+            transform: translateY(-20px);
+        }
+
+        header,
+        nav,
+        main {
+            animation: slideFadeIn 0.7s ease forwards;
+        }
+
+        header {
+            border: 4px solid var(--accent);
+            background-color: #444444;
+            width: 80vw;
+            margin-bottom: 15px;
+            animation-delay: 0.2s;
+        }
+
+        nav {
+            border: 4px solid var(--muted);
+            background-color: #444444;
+            width: 75vw;
+            margin-bottom: 20px;
+            padding: 0 20px;
+            animation-delay: 0.3s;
+        }
+
+        main {
+            background-color: var(--header);
+            color: var(--text);
+            border: 4px solid var(--muted);
+            border-radius: 15px;
+            align-self: center;
+            width: 50vw;
+            margin: 0 auto;
+            min-height: 70vh;
+            transform: translateY(20px);
+            opacity: 0;
+            animation-delay: 0.3s;
+        }
+
+        /* Typography */
+        h1 {
+            text-align: center;
+            margin: 10px 0;
+        }
+
+        /* Navigation Styles */
+        nav ul {
+            list-style: none;
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin: 0;
+            padding: 0;
+        }
+
+        nav .navBtn {
+            background-color: transparent;
+            text-decoration: none;
+            color: var(--header);
+            font-weight: bold;
+            font-size: 1.2rem;
+            transition: color 0.2s, transform 0.2s;
+            height: 40px;
+            margin: 3px;
+        }
+
+        nav .navBtn:hover {
+            color: var(--muted);
+            transform: scaleX(1.1);
+            text-shadow: 0 0 10px var(--muted);
+            transition: color 0.3s ease, transform 0.3s ease, text-shadow 0.3s ease;
+        }
+
+        nav .navBtn.active {
+            color: var(--accent);
+        }
+
+        /* Animations for content fade in */
+        #textDisplay>div {
+            animation: fadeIn 0.8s ease forwards;
+        }
+
+        /* Keyframes */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes slideFadeIn {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes slideFadeIn {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes gradientShift {
+            0% {
+                background-position: 50% 5%;
+            }
+
+            50% {
+                background-position: 50% 95%;
+            }
+
+            100% {
+                background-position: 50% 5%;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div id="head">
+        <header>
+            <h1>Stories</h1>
+        </header>
+        <nav>
+            <ul>
+                <li>
+                    <button class="navBtn" id="dangerousEscape">
+                        The Most Dangerous Escape
+                    </button>
+                </li>
+            </ul>
+        </nav>
+    </div>
+
+    <main>
+        <div id="textDisplay"></div>
+    </main>
+
+    <script>
+        const buttons = document.querySelectorAll(".navBtn");
+        const display = document.getElementById("textDisplay");
+
+        function setActive(button) {
+            buttons.forEach(btn => btn.classList.remove("active"));
+            button.classList.add("active");
+        }
+
+        const storyURLs = {
+            dangerousEscape: "https://raw.githubusercontent.com/Cheze-Burgur/WritingStuff/refs/heads/main/The%20Most%20Dangerous%20Escape/TheMostDangerousEscape.txt",
+        };
+
+        async function loadStory(button, storyKey) {
+            setActive(button);
+
+            try {
+                const response = await fetch(storyURLs[storyKey]);
+                if (!response.ok) throw new Error("Story not found or could not be loaded.");
+                let text = await response.text();
+
+                // Escape HTML special chars
+                text = text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+
+                // Bold (**text**)
+                text = text.replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>");
+                // Italic (*text*)
+                text = text.replace(/(?<!\*)\*(?!\*)(.+?)(?<!\*)\*(?!\*)/g, "<em>$1</em>");
+
+                // Split paragraphs on double newlines
+                const paragraphs = text
+                    .trim()
+                    .split(/\n{2,}/)
+                    .map(p => `<p>${p.replace(/\n/g, " ").trim()}</p>`)
+                    .join("\n");
+
+                display.innerHTML = `
+              <div style="
+                padding: 30px;
+                line-height: 1.6;
+                font-size: 1.1rem;
+                max-width: 70ch;
+                margin: 0 auto;
+                white-space: normal;
+                color: var(--text);
+              ">
+                ${paragraphs}
+              </div>
+            `;
+            } catch (error) {
+                display.innerHTML = `
+              <div style="
+                padding: 30px;
+                line-height: 1.6;
+                font-size: 1.1rem;
+                max-width: 70ch;
+                margin: 0 auto;
+                color: var(--accent);
+                font-weight: bold;
+                text-align: center;
+              ">
+                Error: ${error.message}
+              </div>
+            `;
+            }
+        }
+
+        // Add event listeners to buttons
+        buttons.forEach(button => {
+            button.addEventListener("click", () => {
+                const storyKey = button.id;
+                if (storyURLs[storyKey]) {
+                    loadStory(button, storyKey);
+                } else {
+                    display.innerHTML = `
+                  <div style="
+                    padding: 30px;
+                    line-height: 1.6;
+                    font-size: 1.1rem;
+                    max-width: 70ch;
+                    margin: 0 auto;
+                    color: var(--accent);
+                    font-weight: bold;
+                    text-align: center;
+                  ">
+                    No story linked to this button.
+                  </div>
+                `;
+                }
+            });
+        });
+    </script>
+
+</body>
+
+</html>
