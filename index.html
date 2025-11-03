@@ -88,6 +88,11 @@
             margin: 10px 0;
         }
 
+        main p {
+            text-align: justify;
+            text-indent: 1em;
+        }
+
         /* Navigation Styles */
         nav ul {
             list-style: none;
@@ -120,6 +125,10 @@
             color: var(--accent);
         }
 
+        #textDisplay {
+            transition: opacity 0.4s ease;
+        }
+
         /* Animations for content fade in */
         #textDisplay>div {
             animation: fadeIn 0.8s ease forwards;
@@ -145,13 +154,6 @@
             }
         }
 
-        @keyframes slideFadeIn {
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
         @keyframes gradientShift {
             0% {
                 background-position: 50% 5%;
@@ -163,6 +165,21 @@
 
             100% {
                 background-position: 50% 5%;
+            }
+        }
+
+        /* Responsive */
+        @media (max-width: 800px) {
+
+            header,
+            nav,
+            main {
+                width: 90vw;
+            }
+
+            nav ul {
+                flex-wrap: wrap;
+                gap: 15px;
             }
         }
     </style>
@@ -203,6 +220,7 @@
 
         async function loadStory(button, storyKey) {
             setActive(button);
+            display.style.opacity = 0;
 
             try {
                 const response = await fetch(storyURLs[storyKey]);
@@ -210,7 +228,10 @@
                 let text = await response.text();
 
                 // Escape HTML special chars
-                text = text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+                text = text
+                    .replace(/&/g, "&amp;")
+                    .replace(/</g, "&lt;")
+                    .replace(/>/g, "&gt;");
 
                 // Bold (**text**)
                 text = text.replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>");
@@ -224,34 +245,40 @@
                     .map(p => `<p>${p.replace(/\n/g, " ").trim()}</p>`)
                     .join("\n");
 
-                display.innerHTML = `
-              <div style="
-                padding: 30px;
-                line-height: 1.6;
-                font-size: 1.1rem;
-                max-width: 70ch;
-                margin: 0 auto;
-                white-space: normal;
-                color: var(--text);
-              ">
-                ${paragraphs}
-              </div>
+                setTimeout(() => {
+                    display.innerHTML = `
+                <div style="
+                    padding: 30px;
+                    line-height: 1.6;
+                    font-size: 1.1rem;
+                    max-width: 70ch;
+                    margin: 0 auto;
+                    white-space: normal;
+                    color: var(--text);
+                ">
+                    ${paragraphs}
+                </div>
             `;
+                    display.style.opacity = 1;
+                }, 150);
             } catch (error) {
-                display.innerHTML = `
-              <div style="
-                padding: 30px;
-                line-height: 1.6;
-                font-size: 1.1rem;
-                max-width: 70ch;
-                margin: 0 auto;
-                color: var(--accent);
-                font-weight: bold;
-                text-align: center;
-              ">
-                Error: ${error.message}
-              </div>
+                setTimeout(() => {
+                    display.innerHTML = `
+                <div style="
+                    padding: 30px;
+                    line-height: 1.6;
+                    font-size: 1.1rem;
+                    max-width: 70ch;
+                    margin: 0 auto;
+                    color: var(--accent);
+                    font-weight: bold;
+                    text-align: center;
+                ">
+                    Error: ${error.message}
+                </div>
             `;
+                    display.style.opacity = 1;
+                }, 150);
             }
         }
 
