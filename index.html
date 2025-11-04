@@ -76,12 +76,37 @@
             border-radius: 15px;
             align-self: center;
             width: 55vw;
-            margin: 0 auto;
-            margin-bottom: 10px;
+            margin: 0 auto 10px auto;
+            text-align: center;
+            padding: 15px 0;
             transform: translateY(20px);
             opacity: 0;
+            animation: slideFadeIn 0.7s ease forwards;
             animation-delay: 0.2s;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
         }
+
+        #title h2 {
+            margin: 10px 0;
+            font-size: 1.9rem;
+            font-weight: bold;
+            color: var(--accent);
+            text-align: center;
+            transition: opacity 0.4s ease, transform 0.4s ease;
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        #title h2.fade-out {
+            opacity: 0;
+            transform: translateY(-10px);
+        }
+
+        #title h2.fade-in {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
 
         main {
             background-color: var(--header);
@@ -102,12 +127,6 @@
         h1 {
             text-align: center;
             margin: 10px 0;
-        }
-
-        #title h2 {
-            text-align: center;
-            margin: 10px 0;
-            color: var(--accent);
         }
 
         main p {
@@ -223,7 +242,6 @@
         </nav>
     </div>
 
-    <!-- Add the js for this later -->
     <div id="title">
         <h2>Welcome! Please select a story.</h2>
     </div>
@@ -255,16 +273,37 @@
                 if (!response.ok) throw new Error("Story not found or could not be loaded.");
                 let text = await response.text();
 
+                // Extract the first line as title
+                const lines = text.trim().split(/\r?\n/);
+                let storyTitle = lines.shift().trim(); // First line - Title
+                text = lines.join("\n").trim(); // Main text body
+
                 // Escape HTML special chars
                 text = text
+                    .replace(/&/g, "&amp;")
+                    .replace(/</g, "&lt;")
+                    .replace(/>/g, "&gt;");
+                storyTitle = storyTitle
                     .replace(/&/g, "&amp;")
                     .replace(/</g, "&lt;")
                     .replace(/>/g, "&gt;");
 
                 // Bold (**text**)
                 text = text.replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>");
+                storyTitle = storyTitle.replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>");
                 // Italic (*text*)
                 text = text.replace(/(?<!\*)\*(?!\*)(.+?)(?<!\*)\*(?!\*)/g, "<em>$1</em>");
+                storyTitle = storyTitle.replace(/(?<!\*)\*(?!\*)(.+?)(?<!\*)\*(?!\*)/g, "<em>$1</em>");
+
+                const titleHeading = title.querySelector("h2");
+                titleHeading.classList.remove("fade-in");
+                titleHeading.classList.add("fade-out");
+
+                setTimeout(() => {
+                    titleHeading.innerHTML = storyTitle;
+                    titleHeading.classList.remove("fade-out");
+                    titleHeading.classList.add("fade-in");
+                }, 300);
 
                 // Split paragraphs on double newlines
                 const paragraphs = text
